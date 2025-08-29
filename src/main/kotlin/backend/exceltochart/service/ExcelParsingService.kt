@@ -29,11 +29,11 @@ class ExcelParsingService {
                 val cell = cellIterator.next()
 
                 // cell의 타입을 하고, 값을 가져온다.
-                when (cell.getCellType()) {
+                when (cell.cellType) {
                     CellType.NUMERIC -> print(
-                        cell.getNumericCellValue().toInt().toString() + "\t"
+                        cell.numericCellValue.toInt().toString() + "\t"
                     ) //getNumericCellValue 메서드는 기본으로 double형 반환
-                    CellType.STRING -> print(cell.getStringCellValue() + "\t")
+                    CellType.STRING -> print(cell.stringCellValue + "\t")
                     CellType._NONE -> print("none")
                     CellType.FORMULA -> print("Formula")
                     CellType.BLANK -> print("blank")
