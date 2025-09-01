@@ -1,19 +1,13 @@
 package backend.exceltochart.service
 
 import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Sheet
 import org.springframework.stereotype.Service
 
 @Service
-class ExcelAnalyzeService {
-
-    enum class CellRole{
-        HEADER,
-        VALUE,
-        SUB_HEADER,
-    }
-
+class ExcelAnalyzeService(
+    private val cellInfoUtilService: CellInfoUtilService
+) {
 
     private fun createEmptyCell(sheet: Sheet): Cell {
         // 임시 행과 셀 생성 (실제 시트에 추가되지 않음)
@@ -43,7 +37,7 @@ class ExcelAnalyzeService {
                         nineCell[i][j] = cell
 
                         // 첫 번째로 찾은 빈 셀을 기본값으로 사용
-                        if (defaultCell == null && cell != null && getCellValue(cell).trim().isEmpty()) {
+                        if (defaultCell == null && cell != null && cellInfoUtilService.getCellValue(cell).trim().isEmpty()) {
                             defaultCell = cell
                         }
                     }
@@ -58,7 +52,7 @@ class ExcelAnalyzeService {
 
         nineCell.forEach { row ->
             row.forEach { cell ->
-                print("[${getCellValue(cell)}] ")
+                print("[${cellInfoUtilService.getCellValue(cell)}] ")
             }
             println()
         }
@@ -70,27 +64,5 @@ class ExcelAnalyzeService {
             }
         }
     }
-    // 3. 헬퍼 함수 사용
-    private fun getCellValue(cell: Cell?): String {
-        return when {
-            cell == null -> "null"
-            cell.cellType == CellType.STRING -> cell.stringCellValue
-            cell.cellType == CellType.NUMERIC -> {
-                if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
-                    cell.localDateTimeCellValue.toString()
-                } else {
-                    cell.numericCellValue.toString()
-                }
-            }
-            cell.cellType == CellType.BOOLEAN -> cell.booleanCellValue.toString()
-            cell.cellType == CellType.FORMULA -> cell.cellFormula
-            else -> "empty"
-        }
-    }
-
-//    private fun classifyCell(cell: List<Cell>): CellRole{
-//
-//
-//    }
 
 }
