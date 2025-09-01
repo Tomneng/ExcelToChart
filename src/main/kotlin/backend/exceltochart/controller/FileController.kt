@@ -10,12 +10,13 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api")
-class FileController {
+class FileController(
+    private val excelParsingService: ExcelParsingService
+) {
 
-    val excelParsingService = ExcelParsingService()
 
     @PostMapping("upload")
     fun uploadFile(@RequestParam("file") file: MultipartFile): ApiResponse {
-        return excelParsingService.validateExcel(file)
+        return excelParsingService.processParsing(file)
     }
 }
