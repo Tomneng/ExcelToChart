@@ -83,21 +83,6 @@ class ExcelParsingService(
         }
     }
 
-    // 특정 역할의 셀 위치를 찾는 함수
-    fun findCellsByRole(roleMatrix: Array<Array<CellRole>>, targetRole: CellRole): List<Pair<Int, Int>> {
-        val positions = mutableListOf<Pair<Int, Int>>()
-
-        roleMatrix.forEachIndexed { i, row ->
-            row.forEachIndexed { j, role ->
-                if (role == targetRole) {
-                    positions.add(Pair(i, j))
-                }
-            }
-        }
-
-        return positions
-    }
-
     enum class CellRole{
         HEADER,
         DATA_VALUE,
@@ -125,16 +110,17 @@ class ExcelParsingService(
 
         // 1. 스타일이 bold가 아닌지 확인
         if (!isBold(targetCell)) {
+            print("이거 들어가?")
             score += 1
         }
 
-        // 2. 아래 셀보다 텍스트 크기가 큰지 확인
-        if (isTextSizeLarger(aboveCell, targetCell)) {
+        // 2. 아래 셀과 텍스트 크기가 같은지 확인
+        if (isTextSizeSame(targetCell, belowCell)) {
             score += 1
         }
 
-        // 3. 배경색이 존재하고 아래 셀과 배경색이 다른지 확인
-        if (hasBackgroundColor(targetCell) && isDifferentBackgroundColor(targetCell, belowCell)) {
+        // 3. 배경색이 없거나 아래 셀과 배경색이 같은지 확인
+        if (!hasBackgroundColor(targetCell) && isSameBackgroundColor(targetCell, belowCell)) {
             score += 1
         }
 
@@ -142,8 +128,27 @@ class ExcelParsingService(
         if (!isBlankOrNoStyle(aboveCell)) {
             score += 1
         }
+        print("$score 이게 점수")
+        println("${getCellValue(targetCell)} 이거 뭐나오지")
+        return getCellValue(targetCell) != "" && score >= 2
+    }
+    private fun getCellValue(cell: Cell?): String {
+        return when {
+            cell == null -> "null"
+            cell.cellType == CellType.STRING -> cell.stringCellValue
+            cell.cellType == CellType.NUMERIC -> {
+                if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
+                    cell.localDateTimeCellValue.toString()
+                } else {
+                    cell.numericCellValue.toString()
+                }
+            }
+            cell.cellType == CellType.BOOLEAN -> cell.booleanCellValue.toString()
+            cell.cellType == CellType.FORMULA -> cell.cellFormula
+            else -> "empty"
+        }
+    }
 
-        return score >= 3    }
 
     fun isCategory(cell:Cell): Boolean{
         return false
@@ -217,6 +222,16 @@ class ExcelParsingService(
         }
     }
 
+    private fun isTextSizeSame(targetCell: Cell, compareCell: Cell): Boolean {
+        return try {
+            val targetFont = targetCell.sheet.workbook.getFontAt(targetCell.cellStyle.fontIndexAsInt)
+            val compareFont = compareCell.sheet.workbook.getFontAt(compareCell.cellStyle.fontIndexAsInt)
+            targetFont.fontHeightInPoints == compareFont.fontHeightInPoints
+        } catch (e: Exception) {
+            false
+        }
+    }
+
 
     /**
      * 셀 배경색 존재 여부 검사
@@ -243,6 +258,19 @@ class ExcelParsingService(
             val color1 = cell1.cellStyle.fillForegroundColor
             val color2 = cell2.cellStyle.fillForegroundColor
             color1 != color2
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /**
+     * 셀 배경색 비교 검사
+     */
+    private fun isSameBackgroundColor(cell1: Cell, cell2: Cell): Boolean {
+        return try {
+            val color1 = cell1.cellStyle.fillForegroundColor
+            val color2 = cell2.cellStyle.fillForegroundColor
+            color1 == color2
         } catch (e: Exception) {
             false
         }
