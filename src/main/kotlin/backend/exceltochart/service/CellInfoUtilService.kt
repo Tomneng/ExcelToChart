@@ -146,7 +146,6 @@ class CellInfoUtilService {
         }
     }
 
-
     fun detectSheetRange(sheet: Sheet): Array<Int> {
         val lastRow = sheet.getRow(sheet.lastRowNum)
         val lastColumnNum = lastRow.lastCellNum

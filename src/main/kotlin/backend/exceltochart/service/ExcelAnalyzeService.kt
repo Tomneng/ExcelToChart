@@ -50,12 +50,12 @@ class ExcelAnalyzeService(
             defaultCell = createEmptyCell(sheet)
         }
 
-        nineCell.forEach { row ->
-            row.forEach { cell ->
-                print("[${cellInfoUtilService.getCellValue(cell)}] ")
-            }
-            println()
-        }
+//        nineCell.forEach { row ->
+//            row.forEach { cell ->
+//                print("[${cellInfoUtilService.getCellValue(cell)}] ")
+//            }
+//            println()
+//        }
 
         val finalDefaultCell = defaultCell
         return Array(3) { i ->
