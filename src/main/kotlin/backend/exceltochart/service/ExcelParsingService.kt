@@ -31,9 +31,17 @@ class ExcelParsingService(
         val excelFile = multipartToFile(file)
         val workbook = XSSFWorkbook(excelFile)
         val sheet = workbook.getSheetAt(0)
-        val center = detectSheetRange(sheet)
-        print("${center[0]} ${center[1]}")
-        excelAnalyzeService.nineCellExtractSafe(sheet, center)
+        val fullRange = detectSheetRange(sheet)
+
+        for (i in 0..fullRange[0]) {
+            for (j in 0..fullRange[1]) {
+                val center = listOf(i, j)  // 이게 제일 간단
+
+                println("-------여기--------")
+                println("${center[0]} ${center[1]}")
+                excelAnalyzeService.nineCellExtractSafe(sheet, center)
+            }
+        }
 
         return ApiResponse(true,"성공","없음")
     }

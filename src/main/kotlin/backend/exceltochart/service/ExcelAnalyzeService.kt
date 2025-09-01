@@ -14,11 +14,13 @@ class ExcelAnalyzeService {
         SUB_HEADER,
     }
 
-    fun nineCellExtractSafe(sheet: Sheet, center: Array<Int>): Array<Array<Cell?>> {
+    fun nineCellExtractSafe(sheet: Sheet, center: List<Int>): Array<Array<Cell?>> {
         val nineCell: Array<Array<Cell?>> = Array(3) { arrayOfNulls(3) }
 
         val centerRow = center[0]
         val centerCol = center[1]
+        println(centerRow)
+        println(centerCol)
 
         for (i in 0..2) {
             for (j in 0..2) {
@@ -35,7 +37,32 @@ class ExcelAnalyzeService {
             }
         }
 
+        nineCell.forEach { row ->
+            row.forEach { cell ->
+                print("[${getCellValue(cell)}] ")
+            }
+            println()
+        }
+
         return nineCell
+    }
+
+    // 3. 헬퍼 함수 사용
+    private fun getCellValue(cell: Cell?): String {
+        return when {
+            cell == null -> "null"
+            cell.cellType == CellType.STRING -> cell.stringCellValue
+            cell.cellType == CellType.NUMERIC -> {
+                if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
+                    cell.localDateTimeCellValue.toString()
+                } else {
+                    cell.numericCellValue.toString()
+                }
+            }
+            cell.cellType == CellType.BOOLEAN -> cell.booleanCellValue.toString()
+            cell.cellType == CellType.FORMULA -> cell.cellFormula
+            else -> "empty"
+        }
     }
 
 //    private fun classifyCell(cell: List<Cell>): CellRole{
